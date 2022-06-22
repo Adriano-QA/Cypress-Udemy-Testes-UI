@@ -1,0 +1,15 @@
+{
+  "name": "cypress-udemy-testes-ui",
+  "version": "1.0.0",
+  "description": "Testar UI sem a comunicação com o backend da aplicação",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cy:open": "npx cypress open"
+  },
+  "author": "Adriano Aluizi",
+  "license": "ISC",
+  "dependencies": {
+    "cypress": "^9.7.0"
+  }
+}
