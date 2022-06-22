@@ -67,8 +67,8 @@ describe('Should test at a functional level', () => {
         cy.route({
             method: 'POST',
             url: '/contas',
-            response: { error: "Já existe uma conta com esse nome!" }, 
-            status:400
+            response: { error: "Já existe uma conta com esse nome!" },
+            status: 400
         }).as('saveContaMesmoNome')
 
         cy.acessarMenuConta()
@@ -77,18 +77,29 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should create a transaction', () => {
+
+        cy.route({
+            method: 'POST',
+            url: '/transacoes',
+            response: { "conta_id": 31433, "data_pagamento": "2022-06-22T03:00:00.000Z", "data_transacao": "2022-06-22T03:00:00.000Z", "descricao": "desc", "envolvido": "int", "status": true, "tipo": "REC", "valor": "1100" }
+        })
+        cy.route({
+            method: 'GET',
+            url: '/extrato/**',
+            response: 'fixture:movimentacaoSalva'
+        })
+
         cy.get(loc.MENU.MOVIMENTACAO).click()
 
         cy.get(loc.MOVIMENTACAO.DESCRICAO).type('Descricao')
         cy.get(loc.MOVIMENTACAO.VALOR).type('150')
         cy.get(loc.MOVIMENTACAO.INTERESSADO).type('Inter')
-        cy.get(loc.MOVIMENTACAO.CONTA).select('Conta para movimentacoes')
+        cy.get(loc.MOVIMENTACAO.CONTA).select('Banco')
         cy.get(loc.MOVIMENTACAO.STATUS).click()
         cy.get(loc.MOVIMENTACAO.BTN_SALVAR).click()
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
 
         cy.get(loc.EXTRATO.LINHAS).should('have.length', 7)
-
         cy.xpath(loc.EXTRATO.FN_XP_BUSCA_ELEMENTO('Descric', '150')).should('exist')
 
     })
