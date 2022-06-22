@@ -2,6 +2,7 @@
 
 import loc from '../../support/locators'
 import '../../support/commandsConta'
+import buildEnv from '../../support/buildEnv'
 
 describe('Should test at a functional level', () => {
 
@@ -9,53 +10,14 @@ describe('Should test at a functional level', () => {
         cy.clearLocalStorage()
     })
 
-    before(() => {
-        cy.server()
-        cy.route({
-            method: 'POST',
-            url: '/signin',
-            response: {
-                id: 1000,
-                nome: 'Usuario falso',
-                token: 'Token mock'
-            }
-        }).as('signin')
-
-        cy.route({
-            method: 'GET',
-            url: '/saldo',
-            response: [{
-                conta_id: 999,
-                conta: 'carteira',
-                saldo: "100",
-            },
-            {
-                conta_id: 909,
-                conta: 'banco',
-                saldo: "14674300",
-            }
-            ]
-        }).as('saldo')
-
-        cy.login('teste@qaadriano.com.br', 'senhaerrada')
-    })
-
     beforeEach(() => {
+        buildEnv()
+        cy.login('teste@qaadriano.com.br', 'senhaerrada')
         cy.get(loc.MENU.HOME).click()
         //cy.resetApp()
     })
 
-
-
     it('Should create an account', () => {
-        cy.route({
-            method: 'GET',
-            url: '/contas',
-            response: [
-                { id: 1, nome: "Carteira", visivel: true, usuario_id: 1 },
-                { id: 2, nome: "Banco", visivel: true, usuario_id: 1 }
-            ]
-        }).as('contas')
 
         cy.route({
             method: 'POST',
@@ -82,14 +44,6 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should update an account', () => {
-        cy.route({
-            method: 'GET',
-            url: '/contas',
-            response: [
-                { id: 1, nome: "Carteira", visivel: true, usuario_id: 1 },
-                { id: 2, nome: "Banco", visivel: true, usuario_id: 1 }
-            ]
-        }).as('contas')
 
         cy.route({
             method: 'PUT',
@@ -109,6 +63,14 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should not create an account with same name', () => {
+
+        cy.route({
+            method: 'POST',
+            url: '/contas',
+            response: { error: "Já existe uma conta com esse nome!" }, 
+            status:400
+        }).as('saveContaMesmoNome')
+
         cy.acessarMenuConta()
         cy.inserirConta('Conta mesmo nome')
         cy.get(loc.MESSAGE).should('contain', 'code 400')
