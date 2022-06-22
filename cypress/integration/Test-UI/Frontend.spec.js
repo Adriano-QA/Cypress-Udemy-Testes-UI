@@ -105,8 +105,51 @@ describe('Should test at a functional level', () => {
     })
 
     it('Should get a balance', () => {
+
+        cy.route({
+            method: 'GET',
+            url: '/transacoes/**',
+            response: {
+                "conta": "Conta para saldo",
+                "id": 1163903,
+                "descricao": "Movimentacao 1, calculo saldo",
+                "envolvido": "CCC",
+                "observacao": null,
+                "tipo": "REC",
+                "data_transacao": "2022-06-22T03:00:00.000Z",
+                "data_pagamento": "2022-06-22T03:00:00.000Z",
+                "valor": "3500.00",
+                "status": false,
+                "conta_id": 1248712,
+                "usuario_id": 30842,
+                "transferencia_id": null,
+                "parcelamento_id": null
+            }
+        })
+        
+        cy.route({
+            method: 'PUT',
+            url: '/transacoes/**',
+            response: {
+                "conta": "Conta para saldo",
+                "id": 1163903,
+                "descricao": "Movimentacao 1, calculo saldo",
+                "envolvido": "CCC",
+                "observacao": null,
+                "tipo": "REC",
+                "data_transacao": "2022-06-22T03:00:00.000Z",
+                "data_pagamento": "2022-06-22T03:00:00.000Z",
+                "valor": "3500.00",
+                "status": false,
+                "conta_id": 1248712,
+                "usuario_id": 30842,
+                "transferencia_id": null,
+                "parcelamento_id": null
+            }
+        })
+
         cy.get(loc.MENU.HOME).click()
-        cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('Conta para saldo')).should('contain', '534,00')
+        cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('carteira')).should('contain', '100,00')
 
         cy.get(loc.MENU.EXTRATO).click()
         cy.xpath(loc.EXTRATO.FN_XP_ALTERAR_ELEMENTO('Movimentacao 1, calculo saldo')).click()
@@ -115,13 +158,38 @@ describe('Should test at a functional level', () => {
         cy.get(loc.MOVIMENTACAO.STATUS).click()
         cy.get(loc.MOVIMENTACAO.BTN_SALVAR).click()
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
+
+        cy.route({
+            method: 'GET',
+            url: '/saldo',
+            response: [{
+                conta_id: 999,
+                conta: 'carteira',
+                saldo: "4034.00",
+            },
+            {
+                conta_id: 909,
+                conta: 'banco',
+                saldo: "14674300",
+            }
+            ]
+        }).as('saldoFinal')
+
         cy.get(loc.MENU.HOME).click()
-        cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('Conta para saldo')).should('contain', '4.034,00')
+        cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('carteira')).should('contain', '4.034,00')
 
 
     })
 
     it('Should remove a transaction', () => {
+
+        cy.route({
+            method: 'POST',
+            url: '/transacoes',
+            response: { },
+            status: 204
+        }).as('del') 
+
         cy.get(loc.MENU.EXTRATO).click()
         cy.xpath(loc.EXTRATO.FN_XP_REMOVER_ELEMENTO('Movimentacao para exclusao')).click()
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
